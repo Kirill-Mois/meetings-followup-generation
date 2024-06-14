@@ -9,5 +9,7 @@ pip install -r requirements.txt
 ## Запуск
 
 ```bash
-python run.py
+python run.py 
 ```
+
+**add dotenv, args!**

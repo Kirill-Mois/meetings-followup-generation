@@ -5,6 +5,9 @@ from dataclasses import dataclass
 
 @dataclass
 class SummarizerConfig:
+    chunk_size: int = 20000
+    chunk_overlap: int = 4000
+    breakpoint_threshold_type: str = "standard_deviation"
     chain_name: str
     map_template: str
     reduce_template: str
