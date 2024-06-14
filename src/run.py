@@ -1,13 +1,15 @@
+
 import argparse
-import os
+import time
 from config import SummarizerConfig
 from src.data_loader import DataLoader
 from src.text_splitter import TextSplitter
-from src.summarizer import CHAIN_NAME_TO_CLASS, Summarizer
+from src.summarizer import CHAIN_NAME_TO_CLASS
 from src.evaluator import Evaluator
 
 from dotenv import load_dotenv
 load_dotenv()
+
 
 def main():
     # Load data
@@ -21,14 +23,11 @@ def main():
     loader = DataLoader(markdown_path)
     markdown_text = loader.load_markdown()
 
-    # Split text
-    splitter = TextSplitter(markdown_text)
-    md_docs = splitter.split_recursive()
-    embed_docs = splitter.split_semantic()
-
-    # Summarize
-    summarizer = Summarizer()
     config = SummarizerConfig.from_file(config_path)
+    # Split text
+    splitter = TextSplitter(markdown_text, config)
+    md_docs = splitter.split_recursive()
+    # embed_docs = splitter.split_semantic()
     summarizer = CHAIN_NAME_TO_CLASS[config.chain_name](config)
 
     result = summarizer(md_docs)
@@ -36,9 +35,8 @@ def main():
     print(result)
 
     # Evaluate
-    ideal_summary = "Your ideal summary here"
     evaluator = Evaluator()
-    evaluation = evaluator.evaluate(result, ideal_summary)
+    evaluation = evaluator.evaluate(result)
 
     print("Evaluation:")
     print(evaluation)
