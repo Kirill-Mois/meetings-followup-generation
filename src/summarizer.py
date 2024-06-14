@@ -4,36 +4,43 @@ from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain.chains.llm import LLMChain
 from langchain_core.prompts import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
+from src.config import SummarizerConfig
 
 class Summarizer:
-    def __init__(self, api_key):
-        self.llm = ChatOpenAI(temperature=0, openai_api_key=api_key)
+    def __init__(self, config: SummarizerConfig):
+        self.llm = ChatOpenAI(temperature=0)
+    
+    def __call__(self, documents):
+        raise NotImplementedError
 
-    def map_reduce_summarize(self, documents):
+class MapReduceSummarizer(Summarizer):
+    def __init__(self, config: SummarizerConfig):
+        super().__init__(config)
+
         # Map chain setup
-        map_template = """<MAP PROMPT TEMPLATE HERE>"""
-        map_prompt = PromptTemplate.from_template(map_template)
+        map_prompt = PromptTemplate.from_template(config.map_template)
         map_chain = LLMChain(llm=self.llm, prompt=map_prompt)
 
         # Reduce chain setup
-        reduce_template = """<REDUCE PROMPT TEMPLATE HERE>"""
-        reduce_prompt = PromptTemplate.from_template(reduce_template)
+        reduce_prompt = PromptTemplate.from_template(config.reduce_template)
         reduce_chain = LLMChain(llm=self.llm, prompt=reduce_prompt)
 
         combine_documents_chain = StuffDocumentsChain(llm_chain=reduce_chain, document_variable_name="docs")
         reduce_documents_chain = ReduceDocumentsChain(combine_documents_chain=combine_documents_chain, collapse_documents_chain=combine_documents_chain, token_max=4000)
-        map_reduce_chain = MapReduceDocumentsChain(llm_chain=map_chain, reduce_documents_chain=reduce_documents_chain, document_variable_name="docs", return_intermediate_steps=False)
+        self.chain = MapReduceDocumentsChain(llm_chain=map_chain, reduce_documents_chain=reduce_documents_chain, document_variable_name="docs", return_intermediate_steps=False)
 
-        return map_reduce_chain.run(documents)
+    def __call__(self, documents):
+        return self.chain.run(documents)
 
-    def refine_summarize(self, documents):
-        question_template = """<QUESTION PROMPT TEMPLATE HERE>"""
-        question_prompt = PromptTemplate.from_template(question_template)
+class RefineSummarizer(Summarizer):
+    def __init__(self, config: SummarizerConfig):
+        super().__init__(config)
 
-        refine_template = """<REFINE PROMPT TEMPLATE HERE>"""
-        refine_prompt = PromptTemplate.from_template(refine_template)
+        question_prompt = PromptTemplate.from_template(config.question_template)
 
-        chain = load_summarize_chain(
+        refine_prompt = PromptTemplate.from_template(config.refine_template)
+
+        self.chain = load_summarize_chain(
             llm=self.llm,
             chain_type="refine",
             question_prompt=question_prompt,
@@ -42,4 +49,14 @@ class Summarizer:
             input_key="input_documents",
             output_key="output_text",
         )
-        return chain({"input_documents": documents}, return_only_outputs=True)["output_text"]
+    
+    def __call__(self, documents):
+        return self.chain({"input_documents": documents}, return_only_outputs=True)["output_text"]
+
+
+
+
+CHAIN_NAME_TO_CLASS = {
+    "map_reduce": MapReduceSummarizer,
+    "refine": RefineSummarizer
+}

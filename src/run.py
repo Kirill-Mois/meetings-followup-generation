@@ -1,13 +1,23 @@
+import argparse
 import os
-from src.config import OPENAI_API_KEY
+from config import SummarizerConfig
 from src.data_loader import DataLoader
 from src.text_splitter import TextSplitter
-from src.summarizer import Summarizer
+from src.summarizer import CHAIN_NAME_TO_CLASS, Summarizer
 from src.evaluator import Evaluator
+
+from dotenv import load_dotenv
+load_dotenv()
 
 def main():
     # Load data
-    markdown_path = "path/to/your/markdown_file.md"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config_path", type=str, required=True)
+    parser.add_argument("--markdown_path", type=str, required=True)
+    args = parser.parse_args()
+    config_path = args.config_path
+    markdown_path = args.markdown_path
+
     loader = DataLoader(markdown_path)
     markdown_text = loader.load_markdown()
 
@@ -17,27 +27,22 @@ def main():
     embed_docs = splitter.split_semantic()
 
     # Summarize
-    summarizer = Summarizer(OPENAI_API_KEY)
-    map_reduce_result = summarizer.map_reduce_summarize(md_docs)
-    refine_result = summarizer.refine_summarize(md_docs)
+    summarizer = Summarizer()
+    config = SummarizerConfig.from_file(config_path)
+    summarizer = CHAIN_NAME_TO_CLASS[config.chain_name](config)
 
-    print("Map-Reduce Result:")
-    print(map_reduce_result)
-    
-    print("Refine Result:")
-    print(refine_result)
+    result = summarizer(md_docs)
+
+    print(result)
 
     # Evaluate
     ideal_summary = "Your ideal summary here"
-    evaluator = Evaluator(OPENAI_API_KEY)
-    map_reduce_evaluation = evaluator.evaluate(map_reduce_result, ideal_summary)
-    refine_evaluation = evaluator.evaluate(refine_result, ideal_summary)
+    evaluator = Evaluator()
+    evaluation = evaluator.evaluate(result, ideal_summary)
 
-    print("Map-Reduce Evaluation:")
-    print(map_reduce_evaluation)
+    print("Evaluation:")
+    print(evaluation)
 
-    print("Refine Evaluation:")
-    print(refine_evaluation)
 
 if __name__ == "__main__":
     main()
