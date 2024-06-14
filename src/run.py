@@ -30,7 +30,10 @@ def main():
     # embed_docs = splitter.split_semantic()
     summarizer = CHAIN_NAME_TO_CLASS[config.chain_name](config)
 
+    start_time = time.time()
     result = summarizer(md_docs)
+    end_time = time.time()
+    time_to_complete = end_time - start_time
 
     print(result)
 
@@ -38,7 +41,8 @@ def main():
     evaluator = Evaluator()
     evaluation = evaluator.evaluate(result)
 
-    print("Evaluation:")
+    print("---\nEvaluation:")
+    print("Time to complete:", time_to_complete)
     print(evaluation)
 
 
