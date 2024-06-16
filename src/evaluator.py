@@ -1,9 +1,8 @@
-
 from langchain_core.prompts import PromptTemplate
 from langchain.schema import HumanMessage
 from langchain_openai import ChatOpenAI
 
-EVALUATE_PROMPT="""Ты - эксперт в области обработки текста. Твоя задача – оценить предоставленный итоговый отчёт (буллет-поинты) и сравнить его с идеальным ответом. Тебе нужно определить, есть ли избыточная или фальшивая информация в предоставленном отчёте по сравнению с идеальным ответом.
+EVALUATE_PROMPT = """Ты - эксперт в области обработки текста. Твоя задача – оценить предоставленный итоговый отчёт (буллет-поинты) и сравнить его с идеальным ответом. Тебе нужно определить, есть ли избыточная или фальшивая информация в предоставленном отчёте по сравнению с идеальным ответом.
 
 Инструкции:
 1. Прочитай предоставленный итоговый отчёт и идеальный ответ.
@@ -86,6 +85,7 @@ VK и первые проблемы с властями
 
 # to-do config
 
+
 class Evaluator:
     def __init__(self):
         self.llm = ChatOpenAI(temperature=0)
@@ -93,5 +93,7 @@ class Evaluator:
     def evaluate(self, generated_summary, ideal_summary=IDEAL_SUMMARY):
         evaluation_template = EVALUATE_PROMPT
         evaluation_prompt = PromptTemplate.from_template(evaluation_template)
-        evaluation_message = HumanMessage(content=evaluation_prompt.format(docs=generated_summary, gold=ideal_summary))
+        evaluation_message = HumanMessage(
+            content=evaluation_prompt.format(docs=generated_summary, gold=ideal_summary)
+        )
         return self.llm([evaluation_message]).content

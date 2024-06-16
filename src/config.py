@@ -1,10 +1,10 @@
-
 from pathlib import Path
 
 import yaml
 from dataclasses import dataclass
 
 # constants
+
 
 @dataclass
 class SummarizerConfig:
@@ -19,5 +19,5 @@ class SummarizerConfig:
 
     @classmethod
     def from_file(cls, file_path):
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             return SummarizerConfig(**yaml.safe_load(f))

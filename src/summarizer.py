@@ -6,12 +6,14 @@ from langchain_core.prompts import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from src.config import SummarizerConfig
 
+
 class Summarizer:
     def __init__(self, config: SummarizerConfig):
         self.llm = ChatOpenAI(temperature=0)
-    
+
     def __call__(self, documents):
         raise NotImplementedError
+
 
 class MapReduceSummarizer(Summarizer):
     def __init__(self, config: SummarizerConfig):
@@ -25,12 +27,24 @@ class MapReduceSummarizer(Summarizer):
         reduce_prompt = PromptTemplate.from_template(config.reduce_template)
         reduce_chain = LLMChain(llm=self.llm, prompt=reduce_prompt)
 
-        combine_documents_chain = StuffDocumentsChain(llm_chain=reduce_chain, document_variable_name="docs")
-        reduce_documents_chain = ReduceDocumentsChain(combine_documents_chain=combine_documents_chain, collapse_documents_chain=combine_documents_chain, token_max=4000)
-        self.chain = MapReduceDocumentsChain(llm_chain=map_chain, reduce_documents_chain=reduce_documents_chain, document_variable_name="docs", return_intermediate_steps=False)
+        combine_documents_chain = StuffDocumentsChain(
+            llm_chain=reduce_chain, document_variable_name="docs"
+        )
+        reduce_documents_chain = ReduceDocumentsChain(
+            combine_documents_chain=combine_documents_chain,
+            collapse_documents_chain=combine_documents_chain,
+            token_max=4000,
+        )
+        self.chain = MapReduceDocumentsChain(
+            llm_chain=map_chain,
+            reduce_documents_chain=reduce_documents_chain,
+            document_variable_name="docs",
+            return_intermediate_steps=False,
+        )
 
     def __call__(self, documents):
         return self.chain.run(documents)
+
 
 class RefineSummarizer(Summarizer):
     def __init__(self, config: SummarizerConfig):
@@ -49,14 +63,11 @@ class RefineSummarizer(Summarizer):
             input_key="input_documents",
             output_key="output_text",
         )
-    
+
     def __call__(self, documents):
-        return self.chain({"input_documents": documents}, return_only_outputs=True)["output_text"]
+        return self.chain({"input_documents": documents}, return_only_outputs=True)[
+            "output_text"
+        ]
 
 
-
-
-CHAIN_NAME_TO_CLASS = {
-    "map_reduce": MapReduceSummarizer,
-    "refine": RefineSummarizer
-}
+CHAIN_NAME_TO_CLASS = {"map_reduce": MapReduceSummarizer, "refine": RefineSummarizer}

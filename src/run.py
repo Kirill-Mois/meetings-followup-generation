@@ -1,4 +1,3 @@
-
 import argparse
 import time
 from config import SummarizerConfig
@@ -8,6 +7,7 @@ from src.summarizer import CHAIN_NAME_TO_CLASS
 from src.evaluator import Evaluator
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
