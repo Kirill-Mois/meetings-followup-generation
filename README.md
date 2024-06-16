@@ -34,7 +34,7 @@ OPENAI_API_KEY="sk-..."
 Для запуска скрипта используйте следующую команду:
 
 ```bash
-python src/run.py --config_path "config/<config>.yaml" --markdown_path "data/<markdown>.md"
+python run.py --config_path "config/<config>.yaml" --markdown_path "data/<markdown>.md"
 ```
 
 Замените `<config>` на имя файла конфигурации и `<markdown>` на имя вашего файла с транскриптом встречи.
