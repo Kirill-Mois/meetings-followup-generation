@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 import time
-from config import SummarizerConfig
+from src.config import SummarizerConfig
 from src.data_loader import DataLoader
 from src.summarizer import CHAIN_NAME_TO_CLASS
 from src.evaluator import Evaluator
