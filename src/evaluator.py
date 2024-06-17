@@ -90,7 +90,9 @@ class Evaluator:
     def __init__(self):
         self.llm = ChatOpenAI(temperature=0)
 
-    def evaluate(self, generated_summary:str, ideal_summary:str=IDEAL_SUMMARY) -> str:
+    def evaluate(
+        self, generated_summary: str, ideal_summary: str = IDEAL_SUMMARY
+    ) -> str:
         evaluation_template = EVALUATE_PROMPT
         evaluation_prompt = PromptTemplate.from_template(evaluation_template)
         evaluation_message = HumanMessage(

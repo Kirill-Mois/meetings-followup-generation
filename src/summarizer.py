@@ -34,7 +34,7 @@ class Summarizer:
     def split_text(self, text: str) -> list[Document]:
         if self.config.split_method_name == "recursive":
             return self.split_recursive(text)
-        
+
         if self.config.split_method_name == "semantic":
             return self.split_semantic(text)
 
