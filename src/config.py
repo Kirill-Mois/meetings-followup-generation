@@ -8,6 +8,7 @@ from dataclasses import dataclass
 
 @dataclass
 class SummarizerConfig:
+    split_method_name: str = "recursive"
     chain_name: str
     map_template: str
     reduce_template: str

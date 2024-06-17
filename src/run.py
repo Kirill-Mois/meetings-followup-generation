@@ -1,8 +1,8 @@
 import argparse
+from pathlib import Path
 import time
 from config import SummarizerConfig
 from src.data_loader import DataLoader
-from src.text_splitter import TextSplitter
 from src.summarizer import CHAIN_NAME_TO_CLASS
 from src.evaluator import Evaluator
 
@@ -14,24 +14,20 @@ load_dotenv()
 def main():
     # Load data
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_path", type=str, required=True)
-    parser.add_argument("--markdown_path", type=str, required=True)
+    parser.add_argument("--config_path", type=Path, required=True)
+    parser.add_argument("--markdown_path", type=Path, required=True)
     args = parser.parse_args()
     config_path = args.config_path
     markdown_path = args.markdown_path
 
     loader = DataLoader(markdown_path)
-    markdown_text = loader.load_markdown()
+    markdown_text = loader.load()
 
     config = SummarizerConfig.from_file(config_path)
-    # Split text
-    splitter = TextSplitter(markdown_text, config)
-    md_docs = splitter.split_recursive()
-    # embed_docs = splitter.split_semantic()
     summarizer = CHAIN_NAME_TO_CLASS[config.chain_name](config)
 
     start_time = time.time()
-    result = summarizer(md_docs)
+    result = summarizer(markdown_text)
     end_time = time.time()
     time_to_complete = end_time - start_time
 

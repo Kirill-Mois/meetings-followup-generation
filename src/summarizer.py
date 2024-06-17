@@ -5,13 +5,40 @@ from langchain.chains.llm import LLMChain
 from langchain_core.prompts import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from src.config import SummarizerConfig
+from langchain.text_splitter import Language, RecursiveCharacterTextSplitter
+from langchain_experimental.text_splitter import SemanticChunker
+from langchain_openai.embeddings import OpenAIEmbeddings
+from langchain_core.documents.base import Document
 
 
 class Summarizer:
     def __init__(self, config: SummarizerConfig):
         self.llm = ChatOpenAI(temperature=0)
+        self.config = config
 
-    def __call__(self, documents):
+    def split_recursive(self, text: str) -> list[Document]:
+        splitter = RecursiveCharacterTextSplitter.from_language(
+            language=Language.MARKDOWN,
+            chunk_size=self.config.chunk_size,
+            chunk_overlap=self.config.chunk_overlap,
+        )
+        return splitter.create_documents([text])
+
+    def split_semantic(self, text: str) -> list[Document]:
+        semantic_splitter = SemanticChunker(
+            OpenAIEmbeddings(),
+            breakpoint_threshold_type=self.config.breakpoint_threshold_type,
+        )
+        return semantic_splitter.create_documents([text])
+
+    def split_text(self, text: str) -> list[Document]:
+        if self.config.split_method_name == "recursive":
+            return self.split_recursive(text)
+        
+        if self.config.split_method_name == "semantic":
+            return self.split_semantic(text)
+
+    def __call__(self, text: str) -> str:
         raise NotImplementedError
 
 
@@ -42,7 +69,8 @@ class MapReduceSummarizer(Summarizer):
             return_intermediate_steps=False,
         )
 
-    def __call__(self, documents):
+    def __call__(self, text: str) -> str:
+        documents = self.split_text(text)
         return self.chain.run(documents)
 
 
@@ -64,7 +92,8 @@ class RefineSummarizer(Summarizer):
             output_key="output_text",
         )
 
-    def __call__(self, documents):
+    def __call__(self, text):
+        documents = self.split_text(text)
         return self.chain({"input_documents": documents}, return_only_outputs=True)[
             "output_text"
         ]
