@@ -1,6 +1,5 @@
 langchain
-langchain-openai
-tiktoken
+langchain_openai
 langchain_community
 langchain_experimental
 unstructured
