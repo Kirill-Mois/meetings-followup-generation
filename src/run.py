@@ -3,7 +3,7 @@ from pathlib import Path
 import time
 from src.config import SummarizerConfig
 from src.data_loader import DataLoader
-from src.summarizer import CHAIN_NAME_TO_CLASS
+from src.summarizer import Summarizer
 from src.evaluator import Evaluator
 
 from dotenv import load_dotenv
@@ -24,7 +24,7 @@ def main():
     markdown_text = loader.load()
 
     config = SummarizerConfig.from_file(config_path)
-    summarizer = CHAIN_NAME_TO_CLASS[config.chain_name](config)
+    summarizer = Summarizer.from_config(config)
 
     start_time = time.time()
     result = summarizer(markdown_text)
