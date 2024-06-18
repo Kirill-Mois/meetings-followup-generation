@@ -39,6 +39,11 @@ PYTHONPATH=$PWD python src/run.py --config_path "config/<config>.yaml" --markdow
 
 Замените `<config>` на имя файла конфигурации и `<markdown>` на имя вашего файла с транскриптом встречи.
 
+**Пример:**
+```bash
+PYTHONPATH=$PWD python src/run.py --config_path "config/map_reduce.yaml" --markdown_path "data/interview-durov-markdown.md"
+```
+
 ## Примечания
 
 - Убедитесь, что файл конфигурации и файл транскрипта находятся в соответствующих директориях (config и data).

@@ -50,7 +50,7 @@ class MapReduceSummarizer(Summarizer):
 
     def __call__(self, text: str) -> str:
         documents = self.text_splitter(text)
-        return self.chain.run(documents)
+        return self.chain.invoke(documents)["output_text"]
 
 
 class RefineSummarizer(Summarizer):
@@ -73,9 +73,7 @@ class RefineSummarizer(Summarizer):
 
     def __call__(self, text):
         documents = self.text_splitter(text)
-        return self.chain({"input_documents": documents}, return_only_outputs=True)[
-            "output_text"
-        ]
+        return self.invoke(documents)["output_text"]
 
 
 CHAIN_NAME_TO_CLASS = {"map_reduce": MapReduceSummarizer, "refine": RefineSummarizer}

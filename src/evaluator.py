@@ -98,4 +98,4 @@ class Evaluator:
         evaluation_message = HumanMessage(
             content=evaluation_prompt.format(docs=generated_summary, gold=ideal_summary)
         )
-        return self.llm([evaluation_message]).content
+        return self.llm.invoke([evaluation_message]).content
