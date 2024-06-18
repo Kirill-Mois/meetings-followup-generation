@@ -8,27 +8,14 @@
 Склонируйте репозиторий:
 
 ```bash
-git clone <URL вашего репозитория>
-cd <название репозитория>
-```
-
-Настройте виртуальное окружение:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate   # для Windows используйте .venv\Scripts\activate
+git clone https://github.com/Kirill-Mois/meetings-followup-generation.git
+cd meetings-followup-generation
 ```
 
 Установите зависимости:
 
 ```bash
 pip install -r requirements.txt
-```
-
-Проверьте корректность установки зависимостей:
-
-```bash
-python -m pip check
 ```
 
 ## Настройка
